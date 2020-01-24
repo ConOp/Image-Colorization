@@ -22,11 +22,11 @@ end
 
 num_superpixels = 0;
 for i=1:17    
-    num_superpixels = num_superpixels + max(max(L{i}));
+    num_superpixels = num_superpixels + max(max(L{u}));
     clear max;
 end
 
-y = strings([num_superpixels,1]);
+y = repmat('',num_superpixels,1);
 index = {17};
 adder = 0;
 for u=1:17
@@ -40,9 +40,25 @@ for u=1:17
     [max,index{u}] = max(psa');
     clear max;
     for i=1:max(max(L{u}))
-       y(i+adder,1) = ['Class_',int2str(index{u}(i))];
+       y(i+adder,1) = index{u}(i)
     end
-    adder = adder + i;
+    adder = adder
     clear max;
 end
+
+
+firstimg(L==1);
+x = regionprops(L,'PixelList');
+BW = boundarymask(L);
+imshow(imoverlay(firstimg,BW,'yellow'),'InitialMagnification',67);
+
+wavelength = 20; orientation = [0 45 90 135]; g = gabor(wavelength,orientation);
+outMag = imgaborfilt(firstimg,g);
+K = size(outMag,3);
+gaborfeatures = zeros(NumLabels,K);
+for i=1:K
+   res = regionprops(L,outMag(:,:,i),'MeanIntensity');
+   gaborfeatures(:,i) = [res.MeanIntensity]';
+end   
+
 
