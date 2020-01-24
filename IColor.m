@@ -25,18 +25,20 @@ for i=1:17
     imshow(imoverlay(LABImages{i},BW,'yellow'),'InitialMagnification',67)
     %}
 end
-points = {17};
+SurfFeatures = {17};
+valid_points = {17}
 for i=1:17
-    points{i} = detectSURFFeatures(rgb2gray(Images{1}));
+    points = detectSURFFeatures(rgb2gray(Images{i}));
+    [SurfFeatures{i}, valid_points{i}] = extractFeatures(rgb2gray(Images{i}),points);
 end
-imshow(LABImages{1}); hold on;
-plot(points{i}.selectStrongest(62)); 
+imshow(LABImages{17}); hold on;
+plot(valid_points{17}.selectStrongest(62)); 
 
 wavelength = 20; orientation = [0 45 90 135]; g = gabor(wavelength,orientation);
 outMag = imgaborfilt(rgb2gray(Images{1}),g);
 K = size(outMag,3);
-gaborfeatures = {17}
-for j=1:K
+gaborfeatures = {17};
+for j=1:17
     gaborfeatures{j} = zeros(NumLabels{j},K);
     for i=1:K
        res = regionprops(L{j},outMag(:,:,i),'MeanIntensity');
@@ -44,4 +46,4 @@ for j=1:K
     end    
 end
 
-clear i; clear filename; clear BW;
+clear i; clear j; clear filename;
