@@ -26,19 +26,21 @@ for i=1:17
     %}
 end
 SurfFeatures = {17};
-valid_points = {17}
+valid_points = {17};
 for i=1:17
     points = detectSURFFeatures(rgb2gray(Images{i}));
-    [SurfFeatures{i}, valid_points{i}] = extractFeatures(rgb2gray(Images{i}),points);
+    [SurfFeatures1, valid_points{i}] = extractFeatures(rgb2gray(Images{i}),points);
+    res = regionprops(L{i},SurfFeatures1(:,:),'MeanIntensity');
+     %  sufeatures{j}(:,i) = [res.MeanIntensity]';
 end
 imshow(LABImages{17}); hold on;
 plot(valid_points{17}.selectStrongest(62)); 
 
 wavelength = 20; orientation = [0 45 90 135]; g = gabor(wavelength,orientation);
-outMag = imgaborfilt(rgb2gray(Images{1}),g);
-K = size(outMag,3);
 gaborfeatures = {17};
 for j=1:17
+    outMag = imgaborfilt(rgb2gray(Images{1}),g);
+    K = size(outMag,3);
     gaborfeatures{j} = zeros(NumLabels{j},K);
     for i=1:K
        res = regionprops(L{j},outMag(:,:,i),'MeanIntensity');
