@@ -1,3 +1,5 @@
+clear;
+
 LABImages = {17}; Images = {17};
 grayImage = rgb2gray(imread('.\Dataset\Testing.png'));
 for i=1:17
@@ -9,8 +11,16 @@ for i=1:17
 end
 
 
-[L,centers] = imsegkmeans(uint8(cell2mat(LABImages)),16); %labels, centers of Kmeans
-
+[AllinOne,centers] = imsegkmeans(uint8(cell2mat(LABImages)),64); %labels, centers of Kmeans
+firstimg = AllinOne(1:128,1:128);
+[Ltest,NumLabelstest] = superpixels(firstimg,64);
+BW = boundarymask(Ltest);
+imshow(imoverlay(firstimg,BW,'yellow'),'InitialMagnification',67);
+count = 1
+for i=1:17
+    
+end    
+    
 %B = labeloverlay(LABImages{4},KMEANS_LABImages{4}); imshow(B);
 
 %disp(numel(LABImages)); to get number of elements
@@ -93,5 +103,6 @@ end
 y = repmat('Colored_Image',num_superpixels,1);
 
 model = fitcsvm(x,y);
+result = predict(model,gray_gaborfeatures);
 
 clear j; clear i; clear filename; clear BW;
