@@ -25,21 +25,22 @@ for i=1:17
     imshow(imoverlay(LABImages{i},BW,'yellow'),'InitialMagnification',67)
     %}
 end
+
+%Surf feature extraction for training dataset
 SurfFeatures = {17};
 valid_points = {17};
 for i=1:17
     points = detectSURFFeatures(rgb2gray(Images{i}));
-    [SurfFeatures1, valid_points{i}] = extractFeatures(rgb2gray(Images{i}),points);
-    res = regionprops(L{i},SurfFeatures1(:,:),'MeanIntensity');
-     %  sufeatures{j}(:,i) = [res.MeanIntensity]';
+    [SurfFeatures{i}, valid_points{i}] = extractFeatures(rgb2gray(Images{i}),points);
 end
-imshow(LABImages{17}); hold on;
-plot(valid_points{17}.selectStrongest(62)); 
+%imshow(LABImages{17}); hold on;
+%plot(valid_points{17}.selectStrongest(62)); 
 
+%Gabor feature extraction for training dataset
 wavelength = 20; orientation = [0 45 90 135]; g = gabor(wavelength,orientation);
 gaborfeatures = {17};
 for j=1:17
-    outMag = imgaborfilt(rgb2gray(Images{1}),g);
+    outMag = imgaborfilt(rgb2gray(Images{j}),g);
     K = size(outMag,3);
     gaborfeatures{j} = zeros(NumLabels{j},K);
     for i=1:K
@@ -48,4 +49,49 @@ for j=1:17
     end    
 end
 
-clear j; clear i; clear filename;
+%Superpixels of Test Image
+[Gray_L,Gray_Num] = superpixels(grayImage,256);
+%{
+BW = boundarymask(L{i});
+imshow(imoverlay(grayImage,BW,'yellow'),'InitialMagnification',67)
+%}
+
+%Surf feature extraction for Test Image
+points = detectSURFFeatures(grayImage);
+[Gray_SurfFeatures, Gray_valid_points] = extractFeatures(grayImage,points);
+%{
+imshow(grayImage); hold on;
+plot(Gray_valid_points.selectStrongest(62)); 
+%}
+
+%Gabor feature extraction for Test Image
+outMag = imgaborfilt(grayImage,g);
+K = size(outMag,3);
+gray_gaborfeatures = zeros(Gray_Num,K);
+for i=1:K
+       res = regionprops(Gray_L,outMag(:,:,i),'MeanIntensity');
+       gray_gaborfeatures(:,i) = [res.MeanIntensity]';
+end
+
+%SVM
+num_superpixels = 0;
+for i=1:17
+    num_superpixels = num_superpixels + max(max(L{i}));
+end
+
+x = zeros(num_superpixels,4); %array of all superpixels in the training dataset
+iterator = 0; %specifies the row on which the previous loop was
+for i=1:17
+    for j=1:size(gaborfeatures{i},1)
+        for k=1:4
+            x(iterator+j,k) = gaborfeatures{i}(j,k);
+        end
+    end
+    iterator = iterator + size(gaborfeatures{i},1);
+end
+
+y = repmat('Colored_Image',num_superpixels,1);
+
+model = fitcsvm(x,y);
+
+clear j; clear i; clear filename; clear BW;
