@@ -46,4 +46,4 @@ for j=1:17
     end    
 end
 
-clear i; clear j; clear filename;
+clear j; clear i; clear filename;
