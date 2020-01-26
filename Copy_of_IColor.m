@@ -1,8 +1,8 @@
 clear;
-colors = 16;
-datasetimages=14;
+colors = 64;
+datasetimages=13;
 superpixels_number=24;
-compact=10;
+compact=8;
 LABImages = {datasetimages};
 Images = {datasetimages};
 grayImage = rgb2gray(imread('.\Dataset\Testing.png'));
@@ -107,7 +107,9 @@ end
 
 
 x = zeros(num_superpixels,68); %array of all superpixels in the training dataset
+meangeneralvalues={1,datasetimages};
 iterator = 0; %specifies the row on which the previous loop was
+
 for i=1:datasetimages
     for j=1:size(gaborfeatures{i},1)
         for k=1:4
@@ -117,16 +119,26 @@ for i=1:datasetimages
     iterator = iterator + size(gaborfeatures{i},1);
 end
 
-
-
+iterator =1;
 for i=1:datasetimages
+    mean_surf=cell(1,NumLabels{i});
     for j=1:size(all_points{i},1)
         sinx=all_points{i}(j,1);
         siny=all_points{i}(j,2);
-        x(L{i}(sinx,siny),5:end)=SurfFeatures{i}(j,:);
+        mean_surf{1,L{i}(sinx,siny)}(end+1,:)=SurfFeatures{i}(j,:);
+        %x(L{i}(sinx,siny),5:end)=mean(mean_surf{1,L{i}(sinx,siny)},1);%SurfFeatures{i}(j,:);
+        
+       
+    end
+    for superpixel=1:NumLabels{i}
+        if not(isempty(mean_surf{1,superpixel}))
+        x(iterator,5:end)=mean(mean_surf{1,superpixel},1);
+        end
+        iterator=iterator+1;
     end
     
 end
+
 
 fprintf("Creating model ...\n");
 model = fitcecoc(x,y);
@@ -139,11 +151,6 @@ for i=1:size(result)
         for k=1:128
             if isequal(Gray_L(j,k), i)
                        imgrecreated(j,k,:)= centers(str2double(result(i)),:);
-                       %flag=true;
-                    %elseif flag == true
-                       % flag=false;
-                      % break;
-
            end
             
         end
@@ -151,10 +158,15 @@ for i=1:size(result)
     fprintf(int2str(i));
 end
 a =lab2rgb(imgrecreated,'OutputType','uint8');
+imagessss={datasetimages+2};
+for i=1:datasetimages
+    BW = boundarymask(L{i});
+    imagessss(i)={imoverlay(Images{i},BW,'yellow')};
+end
 BW = boundarymask(Gray_L);
-b=imoverlay(grayImage,BW,'yellow');
-imshow([a,b]);
-
+imagessss(datasetimages+1)={imoverlay(grayImage,BW,'yellow')};
+imagessss(datasetimages+2)={a};
+montage(imagessss);
 
 
 
