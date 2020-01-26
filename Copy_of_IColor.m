@@ -1,24 +1,27 @@
 clear;
-colors = 64;
+colors = 32;
 datasetimages=13;
-superpixels_number=24;
+superpixels_number=20;
 compact=8;
 LABImages = {datasetimages};
 Images = {datasetimages};
 grayImage = rgb2gray(imread('.\Dataset\Testing.png'));
-
+la={datasetimages};
+ab={datasetimages};
 %Initialize
 for i=1:datasetimages
     filename = sprintf('%i.png',i);
     Images{i} = imread(fullfile('.\Dataset',filename));
     LABImages{i} = rgb2lab(Images{i});
-    
+    la1 = LABImages{i}(:,:,1);
+    la{i}=im2single(la1);
+    ab1 = LABImages{i}(:,:,2:3);
+    ab{i} = im2single(ab1);
     %figure(i),imshow(LABImages); to get type of variable --> disp(class(LABImages{3}));
 end
 
-
 %KMEANS
-[AllinOne,centers] = imsegkmeans(uint8(cell2mat(LABImages)),colors); %labels, centers of Kmeans
+[AllinOne,centers] = imsegkmeans(uint8(cell2mat(ab)),colors); %labels, centers of Kmeans
 img = {datasetimages};
 L = {datasetimages};
 NumLabels = {datasetimages};
@@ -85,7 +88,6 @@ end
  [gsurf, gsurf_points] = extractFeatures(grayImage,gray_points);
 
 
-labimg = rgb2lab( repmat(grayImage, [1 1 3]) );
 [Gray_L,Gray_Num] = superpixels(grayImage,superpixels_number,'Compactness',compact);
 %[Gray_L,Gray_Num] = superpixels(labimg,superpixels_number,'Compactness',compact);
 
@@ -150,13 +152,17 @@ for i=1:size(result)
     for j=1:128
         for k=1:128
             if isequal(Gray_L(j,k), i)
-                       imgrecreated(j,k,:)= centers(str2double(result(i)),:);
+                       
+                       imgrecreated(j,k,2:3)= centers(str2double(result(i)),1:2);
            end
             
         end
     end
     fprintf(int2str(i));
 end
+
+labimg = rgb2lab( repmat(grayImage, [1 1 3]) );
+imgrecreated(:,:,1)=labimg(:,:,1);
 a =lab2rgb(imgrecreated,'OutputType','uint8');
 imagessss={datasetimages+2};
 for i=1:datasetimages
