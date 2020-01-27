@@ -1,13 +1,14 @@
 clear;
-colors = 32;
+colors = 64;
 datasetimages=13;
-superpixels_number=20;
+superpixels_number=40;
 compact=8;
 LABImages = {datasetimages};
 Images = {datasetimages};
 grayImage = rgb2gray(imread('.\Dataset\Testing.png'));
 la={datasetimages};
 ab={datasetimages};
+[height, width] = size(grayImage);
 %Initialize
 for i=1:datasetimages
     filename = sprintf('%i.png',i);
@@ -27,7 +28,7 @@ L = {datasetimages};
 NumLabels = {datasetimages};
 %SUPERPIXELS
 for i=1:datasetimages
-    img{i} = AllinOne(1:128,1+128*(i-1):128*i);
+    img{i} = AllinOne(1:height,1+width*(i-1):width*i);
     [L{i},NumLabels{i}] = superpixels(LABImages{i},superpixels_number,'Compactness',compact,'IsInputLab',true);
 end
 
@@ -43,8 +44,8 @@ adder = 0;
 %classes
 for u=1:datasetimages
     psa = zeros(max(max(L{u})),colors); %stiles 64 = classes apo kmeans | seires = pli8os superpixel
-    for i=1:128
-        for j=1:128
+    for i=1:height
+        for j=1:width
             sup = L{u}(i,j); %gia ka8e eikona, gia ka8e pixel se poio superpixel anoikei
             psa(sup,img{u}(i,j)) = psa(sup,img{u}(i,j)) + 1;
         end
@@ -146,11 +147,11 @@ fprintf("Creating model ...\n");
 model = fitcecoc(x,y);
 saveCompactModel(model, 'tenimageseightcolors');
 result = predict(model,gray_gaborfeatures);
-imgrecreated = zeros(128,128,3);
+imgrecreated = zeros(height,width,3);
 %flag = false;
 for i=1:size(result)
-    for j=1:128
-        for k=1:128
+    for j=1:height
+        for k=1:width
             if isequal(Gray_L(j,k), i)
                        
                        imgrecreated(j,k,2:3)= centers(str2double(result(i)),1:2);
