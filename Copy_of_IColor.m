@@ -1,7 +1,7 @@
 clear;
-colors = 32;
+colors = 128;
 datasetimages=13;
-superpixels_number=20;
+superpixels_number=128;
 compact=8;
 LABImages = {datasetimages};
 Images = {datasetimages};
@@ -143,8 +143,8 @@ end
 
 
 fprintf("Creating model ...\n");
-model = fitcecoc(x,y);
-saveCompactModel(model, 'tenimageseightcolors');
+model =loadLearnerForCoder('finalmodel');% fitcecoc(x,y);
+%saveLearnerForCoder(model, 'finalmodel256');
 result = predict(model,gray_gaborfeatures);
 imgrecreated = zeros(128,128,3);
 %flag = false;
