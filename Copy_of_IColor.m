@@ -214,6 +214,6 @@ collage(datasetimages+1)={imoverlay(grayImage,BW,'yellow')};
 collage(datasetimages+2)={a};
 montage(collage);
 clearvars Gray_Num i index j k K L num_superpixels superpixel superpixels_number u x y 
-
+figure (2), imshow(a); %colorized image
 
 
